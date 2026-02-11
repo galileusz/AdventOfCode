@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/AoC_2015/" />
+  <Folder Name="/src/AoC_2016/" />
+  <Folder Name="/src/AoC_2017/" />
+  <Folder Name="/src/AoC_2018/" />
+  <Folder Name="/src/AoC_2019/" />
+  <Folder Name="/src/AoC_2020/" />
+  <Folder Name="/src/AoC_2021/" />
+  <Folder Name="/src/AoC_2022/" />
+  <Folder Name="/src/AoC_2023/" />
+  <Folder Name="/src/AoC_2024/" />
+  <Folder Name="/src/AoC_2025/" />
+  <Project Path="AdventOfCodeManager/AdventOfCodeManager.csproj" />
+</Solution>
