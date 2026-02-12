@@ -10,6 +10,9 @@
   <Folder Name="/src/AoC_2022/" />
   <Folder Name="/src/AoC_2023/" />
   <Folder Name="/src/AoC_2024/" />
-  <Folder Name="/src/AoC_2025/" />
+  <Folder Name="/src/AoC_2025/">
+    <Project Path="src/AoC_2025/AdventOfCode.Year2025/AdventOfCode.Year2025.csproj" Id="41b51881-22d9-4fb4-b52b-da828ce29ad1" />
+  </Folder>
+  <Project Path="AdventOfCode.Commons/AdventOfCode.Commons.csproj" Id="4183e35c-5485-4a8d-b98f-d1636691da5c" />
   <Project Path="AdventOfCodeManager/AdventOfCodeManager.csproj" />
 </Solution>

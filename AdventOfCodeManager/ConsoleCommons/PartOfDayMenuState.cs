@@ -1,59 +1,57 @@
-﻿namespace AdventOfCodeManager.ConsoleCommons;
+﻿using AdventOfCode.Commons.Helpers;
 
-public sealed class PartOfDayMenuState : IMenuState
+namespace AdventOfCodeManager.ConsoleCommons;
+
+public sealed class PartOfDayMenuState : ArrowMenuState
 {
-    private readonly int _year;
-    private readonly int _day;
+	private readonly int _year;
+	private readonly int _day;
 
-    private readonly string[] _parts =
-    {
-        "Rano",
-        "Popołudnie",
-        "Wieczór",
-        "Noc"
-    };
+	private readonly string[] _parts;
+	private Dictionary<string, Type> _partToSolverMap;
 
-    public PartOfDayMenuState(int year, int day)
-    {
-        _year = year;
-        _day = day;
-    }
+	protected override string Title => $"Menu 3/3: Choose Part (Year: {_year}, Day: {_day})";
+	protected override IReadOnlyList<string> Items => _parts;
 
-    public void Render()
-    {
-        Ui.Header($"Menu 3/3: Wybierz część dnia (Rok: {_year}, Dzień: {_day})");
+	protected override NavAction OnEnter(int selectedIndex)
+	{
+		var selected = _partToSolverMap[_parts[selectedIndex]];
+		return NavAction.Push(new ResultState(selected));
+	}
 
-        for (int i = 0; i < _parts.Length; i++)
-            Console.WriteLine($"{i + 1}. {_parts[i]}");
+	public PartOfDayMenuState(int year, int day, List<Type> solvers)
+	{
+		_year = year;
+		_day = day;
 
-        Ui.Footer();
-    }
+		_parts = InitializeParts(solvers);
+		_partToSolverMap = InitializePartToSolverMap(solvers);
+	}
 
-    public NavAction Handle(string input)
-    {
-        if (Ui.IsQuit(input)) return NavAction.Quit();
-        if (Ui.IsBack(input)) return NavAction.Pop();
+	private Dictionary<string, Type> InitializePartToSolverMap(List<Type> solvers)
+	{
+		var solversByPart = new Dictionary<string, Type>();
 
-        if (!int.TryParse(input, out var choice) || choice < 1 || choice > _parts.Length)
-        {
-            Ui.Invalid();
-            return NavAction.Stay();
-        }
+		foreach (var solver in solvers)
+		{
+			var day = AssemblySearcher.GetPartFromNamespace(solver);
+			if (day.HasValue)
+			{
+				solversByPart[$"Part_{day}"] = solver;
+			}
+		}
 
-        string selected = _parts[choice - 1];
+		return solversByPart;
+	}
 
-        Console.Clear();
-        Ui.Header("✅ Wybrano");
-        Console.WriteLine($"Rok:   {_year}");
-        Console.WriteLine($"Dzień: {_day}");
-        Console.WriteLine($"Część: {selected}");
-        Console.WriteLine();
-        Console.WriteLine("Enter = wróć do wyboru części dnia, B = wstecz, Q = wyjście");
-        Console.Write("> ");
-
-        var next = Console.ReadLine()?.Trim() ?? "";
-        if (Ui.IsQuit(next)) return NavAction.Quit();
-        if (Ui.IsBack(next)) return NavAction.Pop();
-        return NavAction.Stay();
-    }
+	private string[] InitializeParts(List<Type> solvers)
+	{
+		return solvers
+			.Select(AssemblySearcher.GetDayFromNamespace)
+			.Where(y => y.HasValue)
+			.Select(y => y!.Value)
+			.Distinct()
+			.OrderBy(y => y).Select(p => $"Part_{p}")
+			.ToArray();
+	}
 }

@@ -1,39 +1,61 @@
-﻿namespace AdventOfCodeManager.ConsoleCommons;
+﻿using AdventOfCode.Commons.Helpers;
 
-public sealed class DayMenuState : IMenuState
+namespace AdventOfCodeManager.ConsoleCommons;
+
+public sealed class DayMenuState : ArrowGridMenuState
 {
-    private readonly int _year;
-    private readonly int[] _days = Enumerable.Range(1, 31).ToArray();
+	private readonly int _year;
+	private readonly int[] _days = Enumerable.Range(1, 31).ToArray();
+	private Dictionary<int, List<Type>> _solversByDay;
 
-    public DayMenuState(int year) => _year = year;
+	protected override string Title => $"Menu 2/3: Choose Day (Year: {_year})";
+	protected override IReadOnlyList<string> Items => _days.Select(d => d.ToString("00")).ToArray();
+	protected override int MaxRowsPerColumn => 10;
 
-    public void Render()
-    {
-        Ui.Header($"Menu 2/3: Wybierz dzień (Rok: {_year})");
+	protected override NavAction OnEnter(int selectedIndex)
+	{ 
+		var day = _days[selectedIndex];
+		var solvers = _solversByDay[day];
+		return NavAction.Push(new PartOfDayMenuState(_year, day, solvers));
+	}
 
-        // proste wypisanie w 2 kolumnach
-        for (int i = 0; i < _days.Length; i += 2)
-        {
-            string left = $"{i + 1}. {_days[i],2}";
-            string right = (i + 1 < _days.Length) ? $"{i + 2}. {_days[i + 1],2}" : "";
-            Console.WriteLine($"{left}    {right}");
-        }
+	public DayMenuState(int year, List<Type> solvers)
+	{
+		_year = year;
 
-        Ui.Footer();
-    }
+		_days = InitializeDays(solvers);
 
-    public NavAction Handle(string input)
-    {
-        if (Ui.IsQuit(input)) return NavAction.Quit();
-        if (Ui.IsBack(input)) return NavAction.Pop();
+		_solversByDay = InitializeSolversByDay(solvers);
+	}
 
-        if (!int.TryParse(input, out var choice) || choice < 1 || choice > _days.Length)
-        {
-            Ui.Invalid();
-            return NavAction.Stay();
-        }
+	private int[] InitializeDays(List<Type> solvers)
+	{
+		return solvers
+			.Select(AssemblySearcher.GetDayFromNamespace)
+			.Where(y => y.HasValue)
+			.Select(y => y!.Value)
+			.Distinct()
+			.OrderBy(y => y)
+			.ToArray();
+	}
 
-        int selectedDay = _days[choice - 1];
-        return NavAction.Push(new PartOfDayMenuState(_year, selectedDay));
-    }
+	private Dictionary<int, List<Type>> InitializeSolversByDay(List<Type> solvers)
+	{
+		var solversByDay = new Dictionary<int, List<Type>>();
+
+		foreach (var solver in solvers)
+		{
+			var day = AssemblySearcher.GetDayFromNamespace(solver);
+			if (day.HasValue)
+			{
+				if (!solversByDay.ContainsKey(day.Value))
+				{
+					solversByDay[day.Value] = new List<Type>();
+				}
+				solversByDay[day.Value].Add(solver);
+			}
+		}
+
+		return solversByDay;
+	}
 }

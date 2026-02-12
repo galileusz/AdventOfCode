@@ -2,6 +2,6 @@
 
 public interface IMenuState
 {
-    void Render();
-    NavAction Handle(string input);
+	void Render();
+	NavAction Handle(ConsoleKeyInfo key);
 }

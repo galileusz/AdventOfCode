@@ -1,31 +1,69 @@
-﻿namespace AdventOfCodeManager.ConsoleCommons;
+﻿using AdventOfCode.Commons;
+using AdventOfCode.Commons.Helpers;
+using System.Reflection;
 
-public sealed class YearMenuState : IMenuState
+namespace AdventOfCodeManager.ConsoleCommons;
+
+public sealed class YearMenuState : ArrowGridMenuState
 {
-    private readonly int[] _years = { 2024, 2025, 2026 };
+	private readonly int[] _years;
+	private Dictionary<int, List<Type>> _solversByYear = [];
 
-    public void Render()
-    {
-        Ui.Header("Menu 1/3: Wybierz rok");
+	protected override string Title => "Menu 1/3: Choose Year";
+	protected override IReadOnlyList<string> Items => _years.Select(y => y.ToString()).ToArray();
 
-        for (int i = 0; i < _years.Length; i++)
-            Console.WriteLine($"{i + 1}. {_years[i]}");
+	protected override int MaxRowsPerColumn => 10;
 
-        Ui.Footer();
-    }
+	protected override NavAction OnEnter(int selectedIndex)
+	{
+		var year = _years[selectedIndex];
+		var solvers = _solversByYear[year];
+		return NavAction.Push(new DayMenuState(year, solvers));
+	}
 
-    public NavAction Handle(string input)
-    {
-        if (Ui.IsQuit(input)) return NavAction.Quit();
-        if (Ui.IsBack(input)) return NavAction.Pop(); // jeśli jesteś na topie, to wyjdzie z appki (stack się opróżni)
+	protected override NavAction OnBack() => NavAction.Quit();
 
-        if (!int.TryParse(input, out var choice) || choice < 1 || choice > _years.Length)
-        {
-            Ui.Invalid();
-            return NavAction.Stay();
-        }
+	public YearMenuState() => _years = InitializeYears();
 
-        int selectedYear = _years[choice - 1];
-        return NavAction.Push(new DayMenuState(selectedYear));
-    }
+	private int[] InitializeYears()
+	{
+		var solvers = AppDomain.CurrentDomain.GetAssemblies()
+			.SelectMany(a =>
+			{
+				try { return a.GetTypes(); }
+				catch (ReflectionTypeLoadException ex) { return ex.Types.Where(x => x != null)!; }
+			})
+			.Where(t => t.IsClass && !t.IsAbstract && typeof(BaseResolver).IsAssignableFrom(t))
+			.ToList();
+
+		_solversByYear = InitializeSolversByYear(solvers);
+
+		return solvers
+			.Select(AssemblySearcher.GetYearFromNamespace)
+			.Where(y => y.HasValue)
+			.Select(y => y!.Value)
+			.Distinct()
+			.OrderBy(y => y)
+			.ToArray();
+	}
+
+	private Dictionary<int, List<Type>> InitializeSolversByYear(List<Type> solvers)
+	{
+		var solversByYear = new Dictionary<int, List<Type>>();
+
+		foreach (var solver in solvers)
+		{
+			var year = AssemblySearcher.GetYearFromNamespace(solver);
+			if (year.HasValue)
+			{
+				if (!solversByYear.ContainsKey(year.Value))
+				{
+					solversByYear[year.Value] = new List<Type>();
+				}
+				solversByYear[year.Value].Add(solver);
+			}
+		}
+
+		return solversByYear;
+	}
 }
