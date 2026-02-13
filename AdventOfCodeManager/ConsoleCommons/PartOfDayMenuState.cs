@@ -47,7 +47,7 @@ public sealed class PartOfDayMenuState : ArrowMenuState
 	private string[] InitializeParts(List<Type> solvers)
 	{
 		return solvers
-			.Select(AssemblySearcher.GetDayFromNamespace)
+			.Select(AssemblySearcher.GetPartFromNamespace)
 			.Where(y => y.HasValue)
 			.Select(y => y!.Value)
 			.Distinct()

@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Day01\Part2\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\..\AdventOfCode.Commons\AdventOfCode.Commons.csproj" />
   </ItemGroup>
 
