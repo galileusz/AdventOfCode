@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <Reference Include="AdventOfCodeGate">
-      <HintPath>..\..\..\AdventOfCodeMeasurments\Commons\AdventOfCodeGate.dll</HintPath>
+      <HintPath>..\Commons\AdventOfCodeGate.dll</HintPath>
     </Reference>
   </ItemGroup>
 
