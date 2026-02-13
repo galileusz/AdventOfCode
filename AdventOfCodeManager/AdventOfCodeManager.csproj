@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AdventOfCode.Commons\AdventOfCode.Commons.csproj" />
+    <ProjectReference Include="..\src\AoC_2015\AdventOfCode.Year2015\AdventOfCode.Year2015.csproj" />
     <ProjectReference Include="..\src\AoC_2025\AdventOfCode.Year2025\AdventOfCode.Year2025.csproj" />
   </ItemGroup>
 

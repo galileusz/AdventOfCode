@@ -1,6 +1,8 @@
 <Solution>
   <Folder Name="/src/" />
-  <Folder Name="/src/AoC_2015/" />
+  <Folder Name="/src/AoC_2015/">
+    <Project Path="src/AoC_2015/AdventOfCode.Year2015/AdventOfCode.Year2015.csproj" Id="bcbe6692-31d9-4e81-ad75-f4ebc1223f86" />
+  </Folder>
   <Folder Name="/src/AoC_2016/" />
   <Folder Name="/src/AoC_2017/" />
   <Folder Name="/src/AoC_2018/" />

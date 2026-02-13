@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\AdventOfCode.Commons\AdventOfCode.Commons.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="AdventOfCodeGate">
+      <HintPath>..\..\..\Commons\AdventOfCodeGate.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
