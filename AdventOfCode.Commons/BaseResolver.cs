@@ -46,7 +46,7 @@ public abstract class BaseResolver : IResolver, IAdventOfCode
 		timer.Stop();
 
 		Console.WriteLine($"{NameOfResolver} - Result: {result}");
-		Console.WriteLine($"{NameOfResolver} - Process Finished in {timer.Elapsed.TotalSeconds} seconds");
+		Console.WriteLine($"{NameOfResolver} - Process Finished in {timer.Elapsed.TotalMilliseconds} ms");
 
 		if (_getDataResultPath != null)
 		{
