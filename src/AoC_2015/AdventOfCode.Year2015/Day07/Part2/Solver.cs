@@ -2,14 +2,24 @@
 using AdventOfCode.Year2015.Day07.Common;
 using AdventOfCodeGate.Interfaces;
 
-namespace AdventOfCode.Year2015.Day07.Part1;
+namespace AdventOfCode.Year2015.Day07.Part2;
 
 internal class Solver : BaseResolver, IAdventOfCode
 {
 	private readonly Dictionary<string, WireInstruction> _wiresLogicDictionary = new();
+	private uint? _resultPart1;
 	public override string Solve(string input)
 	{
+		if (_resultPart1 == null)
+		{
+			var solver1 = new Part1.Solver();
+			var result1 = solver1.Solve(input);
+			_resultPart1 = uint.Parse(result1);
+		}
+
 		_wiresLogicDictionary.Clear();
+		_wiresLogicDictionary["b"] = new WireInstruction(() => _resultPart1.Value);
+
 		var span = input.AsSpan().Trim();
 		var instructions = span.Split('\n');
 
@@ -26,6 +36,8 @@ internal class Solver : BaseResolver, IAdventOfCode
 	{
 		var resultIndex = instruction.IndexOf("->");
 		var resultName = instruction[(resultIndex + 2)..].Trim().ToString();
+		if (resultName == "b")
+			return;
 
 		var indexOfAnd = instruction.IndexOf("AND");
 		if (indexOfAnd != -1)
