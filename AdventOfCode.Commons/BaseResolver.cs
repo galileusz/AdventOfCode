@@ -6,7 +6,8 @@ namespace AdventOfCode.Commons;
 
 public abstract class BaseResolver : IResolver, IAdventOfCode
 {
-	private const string _testDataPath = @"..\..\..\..\testData";
+	//private const string _testDataPath = @"..\..\..\..\testData";
+	private const string _testDataPath = @"D:\src\_00_PrivateGit\AdventOfCode\testData";
 
 	private int _year;
 	private int _day;
