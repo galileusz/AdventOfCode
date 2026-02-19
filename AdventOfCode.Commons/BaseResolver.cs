@@ -16,6 +16,8 @@ public abstract class BaseResolver : IResolver, IAdventOfCode
 	private string? _getDataResultPath;
 	public abstract string Solve(string input);
 
+	public string? DataInputPath => _getDataInputPath;
+
 	protected BaseResolver()
 	{
 		var type = GetType();

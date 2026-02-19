@@ -7,6 +7,7 @@ namespace AdventOfCodeManager.Benchmark;
 public class ResolverBenchmark
 {
 	private BaseResolver _solver = null!;
+	private string _input;
 
 	[IterationSetup]
 	public void Setup()
@@ -22,8 +23,10 @@ public class ResolverBenchmark
 
 		_solver = (BaseResolver)(Activator.CreateInstance(type)
 				?? throw new InvalidOperationException($"Cannot create {type.FullName}"));
+
+		_input = File.ReadAllText(_solver.DataInputPath ?? throw new ArgumentNullException("input path is null"));
 	}
 
 	[Benchmark]
-	public void Solve() => _solver.Resolve();
+	public void Solve() => _solver.Solve(_input);
 }
