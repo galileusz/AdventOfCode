@@ -2,17 +2,19 @@
 using AdventOfCode.Year2015.Day11.Commons;
 using AdventOfCodeGate.Interfaces;
 
-namespace AdventOfCode.Year2015.Day11.Part1;
+namespace AdventOfCode.Year2015.Day11.Part2;
 
 internal class Solver : BaseResolver, IAdventOfCode
 {
 	private const int _maxLetter = 122;
 	private const int _minLetter = 97;
 	private bool _firstRun;
+	private bool _isFirstPasswordFound;
 
 	public override string Solve(string input)
 	{
 		_firstRun = true;
+		_isFirstPasswordFound = false;
 		var span = input.AsSpan().Trim();
 		var maxLevel = span.Length - 1;
 		var password = new byte[span.Length];
@@ -36,8 +38,11 @@ internal class Solver : BaseResolver, IAdventOfCode
 
 		for (var i = minLetter; i <= _maxLetter; i++)
 		{
-			if (context.AreAllRulesRealized)
+			if (_isFirstPasswordFound && context.AreAllRulesRealized)
 				return;
+
+			if (!_isFirstPasswordFound && context.AreAllRulesRealized)
+				_isFirstPasswordFound = true;
 
 			context.ResetRulesRealization(level);
 

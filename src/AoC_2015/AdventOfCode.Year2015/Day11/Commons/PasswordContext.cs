@@ -1,13 +1,16 @@
 ﻿namespace AdventOfCode.Year2015.Day11.Commons;
 
-internal class PasswordContext
+internal class PasswordContext(int maxLevel)
 {
+	public int MaxLevelForFirstPairRule { get; } = maxLevel - 3;
 	public bool IsFirstPairRuleRealized { get; private set; } = false;
 	public bool IsSecondPairRuleRealized { get; private set; } = false;
 	public bool IsStraightRuleRealized { get; private set; } = false;
 	public int FirstPairRuleLevel { get; private set; } = 0;
 	public int SecondPairRuleLevel { get; private set; } = 0;
 	public int StraightRuleLevel { get; private set; } = 0;
+	public bool AreAllRulesRealized =>
+	IsFirstPairRuleRealized && IsSecondPairRuleRealized && IsStraightRuleRealized;
 
 	public void SetFirstPairRuleRealized(int level)
 	{
@@ -45,7 +48,4 @@ internal class PasswordContext
 			StraightRuleLevel = 0;
 		}
 	}
-
-	public bool AreAllRulesRealized() =>
-		IsFirstPairRuleRealized && IsSecondPairRuleRealized && IsStraightRuleRealized;
 }
