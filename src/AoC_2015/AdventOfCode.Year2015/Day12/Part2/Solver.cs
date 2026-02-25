@@ -8,7 +8,6 @@ internal class Solver : BaseResolver, IAdventOfCode
 {
 	public override string Solve(string input)
 	{
-		var sum = 0;
 		var span = input.AsSpan().Trim();
 		var valueStarted = false;
 		var stringStarted = false;
@@ -19,19 +18,50 @@ internal class Solver : BaseResolver, IAdventOfCode
 		var previousIsE = false;
 		var previousIsD = false;
 		var isRedObject = false;
+		var redObjectLevel = -1;
+		var level = -1;
+		var currentNumber = 0;
+		var currentSign = 1;
 
-		var tempSums = new int[30];
-
+		var tempSums = new int[20];
 
 		foreach (var c in span)
 		{
+			if (c == '{')
+				level++;
+
+			if (c == '}')
+			{
+				if (level == 0)
+					break;
+
+				if (isRedObject && level == redObjectLevel)
+				{
+					isRedObject = false;
+					redObjectLevel = -1;
+
+					for (var i = level; i < tempSums.Length; i++)
+						tempSums[i] = 0;
+				}
+				else if (!isRedObject)
+				{
+					tempSums[level-1] += tempSums[level];
+					tempSums[level] = 0;
+				}
+				level--;
+			}
+
+			if (isRedObject && level >= redObjectLevel)
+				continue;
+
+
 			if (c == ':')
 				valueStarted = true;
 
 			if (c == '{' || c == '}' || c == '[' || c == ']' || c == ',')
 				valueStarted = false;
 
-			if (c == '\"')
+			if (c == '\"' && !previousIsD)
 				stringStarted = !stringStarted;
 
 			if (stringStarted && !valueStarted)
@@ -39,7 +69,7 @@ internal class Solver : BaseResolver, IAdventOfCode
 
 			if (stringStarted && valueStarted)
 			{
-				if (c == '\"')
+				if (c == '\"' && !previousIsD)
 					startCheckRed = true;
 				else if (c == 'r' && startCheckRed)
 				{
@@ -61,6 +91,8 @@ internal class Solver : BaseResolver, IAdventOfCode
 					previousIsD = false;
 					numberStarted = false;
 					isRedObject = true;
+					redObjectLevel = level;
+					stringStarted = false;
 				}
 				else
 				{
@@ -69,31 +101,41 @@ internal class Solver : BaseResolver, IAdventOfCode
 					previousIsE = false;
 					previousIsD = false;
 				}
+
+				continue;
 			}
 
 			if (numberStarted && char.IsAsciiDigit(c))
 			{
-				numberBuilder.Append(c);
+				currentNumber = currentNumber * 10 + (c - '0');
 				continue;
 			}
 
 			if (numberStarted && !char.IsDigit(c))
 			{
-				if (int.TryParse(numberBuilder.ToString(), out var number))
-					sum += number;
+				tempSums[level] += currentSign * currentNumber;
 
-				numberBuilder.Clear();
 				numberStarted = false;
 				continue;
 			}
 
-			if (c == '-' || char.IsDigit(c))
+			if (!numberStarted)
 			{
-				numberStarted = true;
-				numberBuilder.Append(c);
+				if (c == '-')
+				{
+					currentSign = -1;
+					numberStarted = true;
+					currentNumber = 0;
+				}
+				if (char.IsAsciiDigit(c))
+				{
+					currentSign = 1;
+					numberStarted = true;
+					currentNumber = c - '0';
+				}
 			}
 		}
-		
-		return sum.ToString();
+
+		return tempSums[0].ToString();
 	}
 }

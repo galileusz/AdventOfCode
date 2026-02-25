@@ -12,7 +12,8 @@ internal class Solver : BaseResolver, IAdventOfCode
 		var span = input.AsSpan().Trim();
 		var stringStarted = false;
 		var numberStarted = false;
-		var numberBuilder = new StringBuilder();
+		var currentNumber = 0;
+		var currentSign = 1;
 
 
 		foreach (var c in span)
@@ -25,24 +26,32 @@ internal class Solver : BaseResolver, IAdventOfCode
 
 			if (numberStarted && char.IsAsciiDigit(c))
 			{
-				numberBuilder.Append(c);
+				currentNumber = currentNumber * 10 + (c - '0');
 				continue;
 			}
 
 			if (numberStarted && !char.IsDigit(c))
 			{
-				if (int.TryParse(numberBuilder.ToString(), out var number))
-					sum += number;
+				sum += currentSign * currentNumber;
 
-				numberBuilder.Clear();
 				numberStarted = false;
 				continue;
 			}
 
-			if (c == '-' || char.IsDigit(c))
+			if (!numberStarted)
 			{
-				numberStarted = true;
-				numberBuilder.Append(c);
+				if (c == '-')
+				{
+					currentSign = -1;
+					numberStarted = true;
+					currentNumber = 0;
+				}
+				if (char.IsAsciiDigit(c))
+				{
+					currentSign = 1;
+					numberStarted = true;
+					currentNumber = c - '0';
+				}
 			}
 		}
 		
