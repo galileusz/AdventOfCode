@@ -2,10 +2,10 @@
 
 namespace AdventOfCode.Year2015.Day09.Common;
 
-internal struct CitiesPair(string firstCity, string secondCity)
+internal struct CitiesPair(int firstCity, int secondCity)
 {
-	public string FirstCity { get; set; } = firstCity;
-	public string SecondCity { get; set; } = secondCity;
+	public int FirstCity { get; set; } = firstCity;
+	public int SecondCity { get; set; } = secondCity;
 
 	public override bool Equals([NotNullWhen(true)] object? obj)
 	{
@@ -23,6 +23,6 @@ internal struct CitiesPair(string firstCity, string secondCity)
 
 	public override int GetHashCode()
 	{
-		return 0;
+		return FirstCity * 17 + SecondCity * 17;
 	}
 }

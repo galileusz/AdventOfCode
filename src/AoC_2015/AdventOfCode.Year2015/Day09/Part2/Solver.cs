@@ -7,7 +7,7 @@ namespace AdventOfCode.Year2015.Day09.Part2;
 internal class Solver : BaseResolver, IAdventOfCode
 {
 	private Dictionary<CitiesPair, int> _distancesDictionary = new Dictionary<CitiesPair, int>();
-	private string[] _cities;
+	private int[] _cities;
 	private List<int[]> _posibilities;
 	public override string Solve(string input)
 	{
@@ -17,7 +17,7 @@ internal class Solver : BaseResolver, IAdventOfCode
 
 		var span = input.AsSpan().Trim();
 		var distancesRanges = span.Split('\n');
-		var cities = new List<string>();
+		var cities = new List<int>();
 
 		foreach (var range in distancesRanges)
 			AddDistance(span[range], cities);
@@ -45,13 +45,13 @@ internal class Solver : BaseResolver, IAdventOfCode
 		return max;
 	}
 
-	private void AddDistance(ReadOnlySpan<char> line, List<string> cities)
+	private void AddDistance(ReadOnlySpan<char> line, List<int> cities)
 	{
 		var toIndex = line.IndexOf(" to ");
 		var equalIndex = line.IndexOf('=');
 
-		var firstCity = line[..toIndex].ToString();
-		var secondCity = line[(toIndex + 4)..(equalIndex - 1)].ToString();
+		var firstCity = GetHash(line[..toIndex]);
+		var secondCity = GetHash(line[(toIndex + 4)..(equalIndex - 1)]);
 
 		if (!cities.Contains(secondCity))
 			cities.Add(secondCity);
@@ -59,7 +59,7 @@ internal class Solver : BaseResolver, IAdventOfCode
 			cities.Add(firstCity);
 
 		var citiesPair = new CitiesPair(firstCity, secondCity);
-		var distance = int.Parse(line[(equalIndex + 2)..].ToString());
+		var distance = int.Parse(line[(equalIndex + 2)..]);
 
 		_distancesDictionary[citiesPair] = distance;
 	}
@@ -98,9 +98,17 @@ internal class Solver : BaseResolver, IAdventOfCode
 		var distance = 0;
 		for (int i = 0; i < item.Length - 1; i++)
 		{
-			var pair = new CitiesPair(span[item[i]], span[item[i+1]]);
+			var pair = new CitiesPair(span[item[i]], span[item[i + 1]]);
 			distance += _distancesDictionary[pair];
 		}
 		return distance;
+	}
+
+	private int GetHash(ReadOnlySpan<char> span)
+	{
+		var hash = 0;
+		foreach (var c in span)
+			hash += 17 + c;
+		return hash;
 	}
 }
