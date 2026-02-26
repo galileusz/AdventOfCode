@@ -1,6 +1,5 @@
 ﻿using AdventOfCode.Commons;
 using AdventOfCodeGate.Interfaces;
-using System.Text;
 
 namespace AdventOfCode.Year2015.Day12.Part2;
 
@@ -12,7 +11,6 @@ internal class Solver : BaseResolver, IAdventOfCode
 		var valueStarted = false;
 		var stringStarted = false;
 		var numberStarted = false;
-		var numberBuilder = new StringBuilder();
 		var startCheckRed = false;
 		var previousIsR = false;
 		var previousIsE = false;

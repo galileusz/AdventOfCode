@@ -1,6 +1,5 @@
 ﻿using AdventOfCode.Commons;
 using AdventOfCodeGate.Interfaces;
-using System.Text;
 
 namespace AdventOfCode.Year2015.Day12.Part1;
 
