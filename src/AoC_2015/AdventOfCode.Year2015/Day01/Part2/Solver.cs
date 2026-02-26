@@ -5,25 +5,18 @@ namespace AdventOfCode.Year2015.Day01.Part2;
 
 internal class Solver : BaseResolver, IAdventOfCode
 {
-	private static readonly Dictionary<char, int> _directions = new()
-	{
-		{ '(', 1 },
-		{ ')', -1 }
-	};
-
 	public override string Solve(string input)
 	{
-		var count = 0;
 		var result = 0;
+		var span = input.AsSpan().Trim();
+		var i = 0;
 
-		foreach (var c in input.AsSpan().Trim())
+		do
 		{
-			count++;
-			result += _directions[c];
-			if (result < 0)
-				break;
-		}
+			result += 1 - ((span[i] - '(') << 1);
+			i++;
+		} while (result >= 0);
 
-		return count.ToString();
+		return (i).ToString();
 	}
 }

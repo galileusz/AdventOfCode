@@ -8,7 +8,7 @@ internal class Solver : BaseResolver, IAdventOfCode
 {
 	public override string Solve(string input)
 	{
-		var currentNumber = new StringBuilder();
+		var currentNumber = 0;
 		var numbers = new int[3];
 		var index = 0;
 		var result = 0;
@@ -16,7 +16,7 @@ internal class Solver : BaseResolver, IAdventOfCode
 		{
 			if (c == '\n')
 			{
-				numbers[2] = int.Parse(currentNumber.ToString());
+				numbers[2] = currentNumber;
 				numbers.Sort();
 
 				var ab = numbers[0] * numbers[1];
@@ -24,19 +24,19 @@ internal class Solver : BaseResolver, IAdventOfCode
 				var ac = numbers[0] * numbers[2];
 
 				result += 3 * ab + 2 * (bc + ac);
-				
-				currentNumber.Clear();
+
+				currentNumber = 0;
 				index = 0;
 			}
 			else if (c == 'x')
 			{
-				numbers[index] = int.Parse(currentNumber.ToString());
-				currentNumber.Clear();
+				numbers[index] = currentNumber;
+				currentNumber = 0;
 				index++;
 			}
 			else
 			{
-				currentNumber.Append(c);
+				currentNumber = currentNumber * 10 + (c - '0');
 			}
 		}
 
