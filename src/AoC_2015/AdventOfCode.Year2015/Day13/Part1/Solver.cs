@@ -9,12 +9,10 @@ internal class Solver : BaseResolver, IAdventOfCode
 {
 	private List<PeoplePair> _happinessList;
 	private int[] _people;
-	private List<int[]> _posibilities;
 
 	public override string Solve(string input)
 	{
 		_happinessList = new List<PeoplePair>();
-		_posibilities = new List<int[]>();
 
 		var span = input.AsSpan().Trim();
 		var lines = span.Split('\n');
@@ -25,9 +23,10 @@ internal class Solver : BaseResolver, IAdventOfCode
 
 		_people = people.ToArray();
 
-		CreatePosibilities(_people.Length);
+		var max = int.MinValue;
+		CheckPosibilities(_people.Length, ref max);	
 
-		return GetCombinedHappiness();
+		return max.ToString();
 	}
 
 	private void AddPairs(ReadOnlySpan<char> span, List<PeoplePair> happinessList, List<int> people)
@@ -67,22 +66,24 @@ internal class Solver : BaseResolver, IAdventOfCode
 			hash += 17 + c;
 		return hash;
 	}
-	private void CreatePosibilities(int length)
+	private void CheckPosibilities(int length, ref int max)
 	{
 		var referenceList = new List<int>();
 		for (int i = 0; i < length; i++)
 			referenceList.Add(i);
 
 		var tempList = new List<int>();
-
-		Recurency(referenceList, tempList, _posibilities);
+		Recurency(referenceList, tempList, ref max);
 	}
 
-	private void Recurency(List<int> referenceList, List<int> tempList, List<int[]> posibilities)
+	private void Recurency(List<int> referenceList, List<int> tempList, ref int max)
 	{
 		if (referenceList.Count == 0)
 		{
-			posibilities.Add(tempList.ToArray());
+			var item = tempList.ToArray();
+			var happiness = GetTableHappiness(item);
+			if (happiness > max)
+				max = happiness;
 			return;
 		}
 
@@ -91,21 +92,8 @@ internal class Solver : BaseResolver, IAdventOfCode
 			var newReference = referenceList.Where(x => x != i).ToList();
 			var newTemp = tempList.ToList();
 			newTemp.Add(i);
-			Recurency(newReference, newTemp, posibilities);
+			Recurency(newReference, newTemp, ref max);
 		}
-	}
-
-	private string GetCombinedHappiness()
-	{
-		var max = 0;
-		foreach (var item in _posibilities)
-		{
-			var happiness = GetTableHappiness(item);
-			if (happiness > max)
-				max = happiness;
-		}
-
-		return max.ToString();
 	}
 
 	private int GetTableHappiness(int[] item)
