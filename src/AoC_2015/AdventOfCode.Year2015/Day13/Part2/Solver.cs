@@ -70,18 +70,17 @@ internal class Solver : BaseResolver, IAdventOfCode
 	{
 		var referenceList = new List<int>();
 		for (int i = 0; i < length; i++)
-			referenceList.Add(i);
+			referenceList.Add(i + 1);
 
-		var tempList = new List<int>();
-
-		Recurency(referenceList, tempList, ref max);
+		var tempPossibility = 0;
+		Recurency(referenceList, ref tempPossibility, ref max);
 	}
 
-	private void Recurency(List<int> referenceList, List<int> tempList, ref int max)
+	private void Recurency(List<int> referenceList, ref int tempPossibility, ref int max)
 	{
 		if (referenceList.Count == 0)
 		{
-			var item = tempList.ToArray();
+			var item = tempPossibility;
 			var happiness = GetTableHappiness(item);
 			if (happiness > max)
 				max = happiness;
@@ -91,29 +90,51 @@ internal class Solver : BaseResolver, IAdventOfCode
 		foreach (int i in referenceList)
 		{
 			var newReference = referenceList.Where(x => x != i).ToList();
-			var newTemp = tempList.ToList();
-			newTemp.Add(i);
-			Recurency(newReference, newTemp, ref max);
+			var newTemp = tempPossibility * 10;
+			newTemp += i;
+			Recurency(newReference, ref newTemp, ref max);
 		}
 	}
 
-	private int GetTableHappiness(int[] item)
+	private int GetTableHappiness(int item)
 	{
-		var happiness = 0;
-		for (int i = 0; i < item.Length; i++)
+		if (item == 123746589)
 		{
-			var firstPerson = _people[item[i]];
-			var secondPerson = _people[item[(i + 1) % item.Length]];
+			var test0 = 0;
+		}
+		var happiness = 0;
+		var firstElement = -1;
+		var previousElement = -1;
+		for (int i = 0; i <= _people.Length; i++)
+		{
+			var element = item % 10 - 1;
+			item /= 10;
+			if (previousElement != -1)
+			{
+				if (element == -1)
+					element = firstElement;
 
-			if (firstPerson == 0 || secondPerson == 0)
-				continue;
+				var firstPerson = _people[previousElement];
+				var secondPerson = _people[element];
 
-			var pair = _happinessList.FirstOrDefault(x => (x.FirstPerson == firstPerson && x.SecondPerson == secondPerson) || 
-																										(x.FirstPerson == secondPerson && x.SecondPerson == firstPerson));
+				if (firstPerson == 0 || secondPerson == 0)
+				{
+					previousElement = element;
+					continue;
+				}
 
-			happiness += pair.Happiness;
+				var pair = _happinessList.First(x => (x.FirstPerson == firstPerson && x.SecondPerson == secondPerson) ||
+																						 (x.FirstPerson == secondPerson && x.SecondPerson == firstPerson));
+				happiness += pair.Happiness;
+			}
+
+			if (i == 0)
+				firstElement = element;
+
+			previousElement = element;
 		}
 
 		return happiness;
 	}
+
 }
