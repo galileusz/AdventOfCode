@@ -17,8 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Day14\Part1\" />
-    <Folder Include="Day14\Part2\" />
+    <Folder Include="Day15\Part1\" />
+    <Folder Include="Day15\Part2\" />
   </ItemGroup>
 
 </Project>
