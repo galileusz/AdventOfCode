@@ -2,7 +2,7 @@
 using AdventOfCodeGate.Interfaces;
 using System.Collections.Immutable;
 
-namespace AdventOfCode.Year2015.Day15.Part1;
+namespace AdventOfCode.Year2015.Day15.Part2;
 
 internal class Solver : BaseResolver, IAdventOfCode
 {
@@ -10,7 +10,7 @@ internal class Solver : BaseResolver, IAdventOfCode
 
 	public override string Solve(string input)
 	{
-		_ingredients = new int[16];
+		_ingredients = new int[20];
 		var span = input.AsSpan().Trim();
 		var lines = span.Split('\n');
 
@@ -37,12 +37,14 @@ internal class Solver : BaseResolver, IAdventOfCode
 				{
 					if (i1 + i2 + i3 > 100)
 						continue;
+					if (ingredients[4] * i1 + ingredients[9] * i2 + ingredients[14] * i3 + ingredients[19] * (100 - i1 - i2 - i3) != 500)
+						continue;
 
 					var i4 = 100 - i1 - i2 - i3;
-					var capacity = ingredients[0] * i1 + ingredients[4] * i2 + ingredients[8] * i3 + ingredients[12] * i4;
-					var durability = ingredients[1] * i1 + ingredients[5] * i2 + ingredients[9] * i3 + ingredients[13] * i4;
-					var flavor = ingredients[2] * i1 + ingredients[6] * i2 + ingredients[10] * i3 + ingredients[14] * i4;
-					var texture = ingredients[3] * i1 + ingredients[7] * i2 + ingredients[11] * i3 + ingredients[15] * i4;
+					var capacity = ingredients[0] * i1 + ingredients[5] * i2 + ingredients[10] * i3 + ingredients[15] * i4;
+					var durability = ingredients[1] * i1 + ingredients[6] * i2 + ingredients[11] * i3 + ingredients[16] * i4;
+					var flavor = ingredients[2] * i1 + ingredients[7] * i2 + ingredients[12] * i3 + ingredients[17] * i4;
+					var texture = ingredients[3] * i1 + ingredients[8] * i2 + ingredients[13] * i3 + ingredients[18] * i4;
 					if (capacity < 0)
 						capacity = 0;
 					if (durability < 0)
@@ -67,11 +69,12 @@ internal class Solver : BaseResolver, IAdventOfCode
 		var indexTexture = span.IndexOf(" texture ");
 		var indexCalories = span.IndexOf(" calories ");
 
-		var i = index * 4;
+		var i = index * 5;
 		ingredients[i] = GetIntValue(span, indexCapacity + 10, indexDurability - 1);
 		ingredients[i + 1] = GetIntValue(span, indexDurability + 12, indexFlavor - 1);
 		ingredients[i + 2] = GetIntValue(span, indexFlavor + 8, indexTexture - 1);
 		ingredients[i + 3] = GetIntValue(span, indexTexture + 9, indexCalories - 1);
+		ingredients[i + 4] = GetIntValue(span, indexCalories + 10, span.Length);
 	}
 
 	private int GetIntValue(ReadOnlySpan<char> span, int startIndex, int endIndex)
