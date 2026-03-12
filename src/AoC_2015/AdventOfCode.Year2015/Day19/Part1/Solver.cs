@@ -29,19 +29,33 @@ internal class Solver : BaseResolver, IAdventOfCode
 				_checkString = line;
 		}
 
+		var amount = 0;
+
 		for (int i = 0; i < _replacements.Count; i += 2)
 		{
-			var amount = CheckAmountOfChanges(span, i);
+			amount += CheckAmountOfChanges(span, i);
 		}
 
-
-		return string.Empty;
+		return amount.ToString();
 	}
 
 	private int CheckAmountOfChanges(ReadOnlySpan<char> span, int i)
 	{
 		var lookingFor = span[_replacements[i]];
 
+		var amount = CalculateAppearancesOfString(span, lookingFor);
+
+		if (amount > 0)
+		{
+			var minusAmount = CheckAmountOfAgregateChanges(span, i, lookingFor, span[_replacements[i + 1]]);
+			amount -= minusAmount;
+		}
+
+		return amount;
+	}
+
+	private int CalculateAppearancesOfString(ReadOnlySpan<char> span, ReadOnlySpan<char> lookingFor)
+	{
 		var amount = 0;
 		var index = -1;
 		do
@@ -56,17 +70,12 @@ internal class Solver : BaseResolver, IAdventOfCode
 
 		} while (index != -1);
 
-		if (amount > 0)
-		{
-			var minusAmount = CheckAmountOfAgregateChanges(span, i, lookingFor, span[_replacements[i + 1]]);
-			amount -= minusAmount;
-		}
-
 		return amount;
 	}
 
 	private int CheckAmountOfAgregateChanges(ReadOnlySpan<char> span, int i, ReadOnlySpan<char> lookingFor, ReadOnlySpan<char> replacement)
 	{
+		var amount = 0;
 		var indexInReplacment = replacement.IndexOf(lookingFor);
 		if (indexInReplacment == -1)
 			return 0;
@@ -75,7 +84,14 @@ internal class Solver : BaseResolver, IAdventOfCode
 		var endsWith = replacement.EndsWith(lookingFor);
 		var isMultiplied = CheckIsMultiplied(lookingFor, replacement);
 
-		return 0;
+		if (startsWith)
+			amount += GetAmountOfStartAgregation(span, lookingFor, replacement, i);
+		if (endsWith)
+			amount += GetAmountOfEndAgregation(span, lookingFor, replacement, i);
+		if (isMultiplied)
+			amount += CalculateAppearancesOfString(span, replacement);
+
+		return amount;
 	}
 
 	private bool CheckIsMultiplied(ReadOnlySpan<char> lookingFor, ReadOnlySpan<char> replacement)
@@ -96,5 +112,45 @@ internal class Solver : BaseResolver, IAdventOfCode
 			return false;
 
 		} while (true);
+	}
+
+	private int GetAmountOfStartAgregation(ReadOnlySpan<char> span, ReadOnlySpan<char> lookingFor, ReadOnlySpan<char> replacement, int i)
+	{
+		var amount = 0;
+		var tail = replacement[lookingFor.Length..];
+		for (var j = i + 2; j < _replacements.Count; j += 2)
+		{
+			var item = span[_replacements[j]];
+			var replacementItem = span[_replacements[j + 1]];
+			if (replacementItem.StartsWith(tail) && replacementItem.EndsWith(item) && replacementItem.Length == tail.Length + item.Length)
+			{
+				Span<char> alloc = stackalloc char[lookingFor.Length + item.Length];
+
+				lookingFor.CopyTo(alloc);
+				item.CopyTo(alloc[lookingFor.Length..]);
+				amount += CalculateAppearancesOfString(span, alloc);
+			}
+		}
+		return amount;
+	}
+
+	private int GetAmountOfEndAgregation(ReadOnlySpan<char> span, ReadOnlySpan<char> lookingFor, ReadOnlySpan<char> replacement, int i)
+	{
+		var amount = 0;
+		var head = replacement[..^lookingFor.Length];
+		for (var j = i + 2; j < _replacements.Count; j += 2)
+		{
+			var item = span[_replacements[j]];
+			var replacementItem = span[_replacements[j + 1]];
+			if (replacementItem.EndsWith(head) && replacementItem.StartsWith(item) && replacementItem.Length == head.Length + item.Length)
+			{
+				Span<char> alloc = stackalloc char[lookingFor.Length + item.Length];
+
+				item.CopyTo(alloc);
+				lookingFor.CopyTo(alloc[item.Length..]);
+				amount += CalculateAppearancesOfString(span, alloc);
+			}
+		}
+		return amount;
 	}
 }
