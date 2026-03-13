@@ -2,7 +2,7 @@
 using AdventOfCodeGate.Interfaces;
 using System.Globalization;
 
-namespace AdventOfCode.Year2015.Day20.Part1;
+namespace AdventOfCode.Year2015.Day20.Part2;
 
 internal class Solver : BaseResolver, IAdventOfCode
 {
@@ -11,7 +11,7 @@ internal class Solver : BaseResolver, IAdventOfCode
 	{
 		_min = int.MaxValue;
 		int[] primeNumbers = { 2, 3, 5, 7, 11, 13 };
-		var checkNumber = int.Parse(input) / 10;
+		var checkNumber = int.Parse(input);
 
 		for (int i = 0; i <= 10; i++)
 		{
@@ -69,20 +69,21 @@ internal class Solver : BaseResolver, IAdventOfCode
 			}
 		}
 
+
 		return _min.ToString();
 	}
 
 	public bool CheckIsAnswer(int number, int checkNumber)
 	{
-		if (number > checkNumber / 2 || number < 0)
+		if (number > checkNumber / 20 || number < 0)
 			return false;
 
-		var valueX = 1 + number;
+		var valueX = (1 + number) * 11;
 
 		for (var j = 2; j < number; j++)
 		{
-			if (number % j == 0)
-				valueX += j;
+			if (number % j == 0 && number / j <= 50)
+				valueX += j * 11;
 		}
 
 		var result = valueX >= checkNumber;
