@@ -1,6 +1,7 @@
 ﻿using AdventOfCode.Commons;
 using AdventOfCode.Year2015.Day04.Commons;
 using AdventOfCodeGate.Interfaces;
+using System.Buffers;
 using System.Text;
 namespace AdventOfCode.Year2015.Day04.Part2;
 
@@ -10,6 +11,9 @@ internal class Solver : BaseResolver, IAdventOfCode
 	{
 		ReadOnlySpan<char> hash;
 		byte[] prefixBytes = Encoding.UTF8.GetBytes(input);
+		var poolByte = ArrayPool<byte>.Shared;
+		var poolUint = ArrayPool<uint>.Shared;
+
 
 		var i = 0;
 		string number;
@@ -27,7 +31,7 @@ internal class Solver : BaseResolver, IAdventOfCode
 				buffer[prefixBytes.Length + j] = (byte)number[j];
 
 			i++;
-			hash = MD5Coder.Code(buffer);
+			hash = MD5Coder.Code(buffer, poolByte, poolUint);
 			//Console.Write($"\t->{hash}\n");
 
 		} while (!hash.StartsWith("000000"));

@@ -1,4 +1,6 @@
-﻿namespace AdventOfCode.Year2015.Day04.Commons;
+﻿using System.Buffers;
+
+namespace AdventOfCode.Year2015.Day04.Commons;
 
 internal static class MD5Coder
 {
@@ -28,7 +30,7 @@ internal static class MD5Coder
 		0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391,
 	];
 
-	public static ReadOnlySpan<char> Code(byte[] input)
+	public static ReadOnlySpan<char> Code(byte[] input, ArrayPool<byte> poolByte, ArrayPool<uint> poolUint)
 	{
 		uint a0 = 0x67452301;
 		uint b0 = 0xefcdab89;
@@ -36,7 +38,7 @@ internal static class MD5Coder
 		uint d0 = 0x10325476;
 
 		var addZerosLength = (56 - ((input.Length + 1) % 64)) % 64;
-		var processedInput = new byte[input.Length + 1 + addZerosLength + 8];
+		var processedInput = poolByte.Rent(input.Length + 1 + addZerosLength + 8);
 		Array.Copy(input, processedInput, input.Length);
 		processedInput[input.Length] = 0x80;
 
@@ -45,7 +47,7 @@ internal static class MD5Coder
 
 		for (int index = 0; index < processedInput.Length / 64; ++index)
 		{
-			uint[] m = new uint[16];
+			uint[] m = poolUint.Rent(16);
 			for (int i = 0; i < 16; ++i)
 				m[i] = BitConverter.ToUInt32(processedInput, (index * 64) + (i * 4));
 
@@ -86,11 +88,15 @@ internal static class MD5Coder
 				b += LeftRotate(f, _s[i]);
 			}
 
+			poolUint.Return(m);
+
 			a0 += a;
 			b0 += b;
 			c0 += c;
 			d0 += d;
 		}
+
+		poolByte.Return(processedInput);
 
 		return GetByteString(a0);  //+ GetByteString(b0) + GetByteString(c0) + GetByteString(d0);
 	}
