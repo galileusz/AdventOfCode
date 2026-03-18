@@ -1,108 +1,93 @@
-﻿namespace AdventOfCode.Year2015.Day22.Commons;
+﻿using System.Buffers;
+
+namespace AdventOfCode.Year2015.Day22.Commons;
 
 internal class BattleData
 {
-	public bool PlayerWins { get; set; }
-	public bool IsCompleted { get; set; }
-	public bool IsPlayerTurn { get; set; } = true;
-	public int TotalManaSpent { get; private set; } = 0;
+	public BattleData(ArrayPool<int> pool, int playerHealth, int playerMana, int bossHealth)
+	{
+		IsPlayerTurn = true;
+		Data = pool.Rent(7);
+		Data[0] = playerHealth;
+		Data[1] = playerMana;
+		Data[2] = bossHealth;
+	}
 
-	public int PlayerHealth { get; set; }
-	public int PlayerMana { get; set; }
-	public int BossHealth { get; set; }
-	public int BossDamage { get; set; }
-	public int ShieldTimer { get; set; }
-	public int PoisonTimer { get; set; }
-	public int RechargeTimer { get; set; }
+	public bool IsPlayerTurn { get; set; }
+	public int[] Data { get; }
 
-	public bool CanCastMissile() => PlayerMana >= SpellInfo.MissileMana;
-	public bool CanCastDrain() => PlayerMana >= SpellInfo.DrainMana;
-	public bool CanCastShield() => PlayerMana >= SpellInfo.ShieldMana;
-	public bool CanCastPoison() => PlayerMana >= SpellInfo.PoisonMana;
-	public bool CanCastRecharge() => PlayerMana >= SpellInfo.RechargeMana;
-	public bool CanCastAny() => PlayerMana >= SpellInfo.MissileMana;
+	public bool CanCastMissile() => Data[1] >= SpellInfo.MissileMana;
+	public bool CanCastDrain() => Data[1] >= SpellInfo.DrainMana;
+	public bool CanCastShield() => Data[1] >= SpellInfo.ShieldMana;
+	public bool CanCastPoison() => Data[1] >= SpellInfo.PoisonMana;
+	public bool CanCastRecharge() => Data[1] >= SpellInfo.RechargeMana;
+	public bool CanCastAny() => Data[1] >= SpellInfo.MissileMana;
+
+	public bool IsPlayerWin() => Data[2] <= 0;
+	public bool IsComplete() => Data[0] <= 0 || IsPlayerWin();
+	public int GetTotalManaSpent() => Data[6];
 
 	public void CastMissile()
 	{
-		PlayerMana -= SpellInfo.MissileMana;
-		BossHealth -= 4;
-		TotalManaSpent += SpellInfo.MissileMana;
+		Data[1] -= SpellInfo.MissileMana;
+		Data[2] -= 4;
+		Data[6] += SpellInfo.MissileMana;
 	}
 
 	public void CastDrain()
 	{
-		PlayerMana -= SpellInfo.DrainMana;
-		PlayerHealth += 2;
-		BossHealth -= 2;
-		TotalManaSpent += SpellInfo.DrainMana;
+		Data[1] -= SpellInfo.DrainMana;
+		Data[0] += 2;
+		Data[2] -= 2;
+		Data[6] += SpellInfo.DrainMana;
 	}
 
 	public void CastShield()
 	{
-		PlayerMana -= SpellInfo.ShieldMana;
-		ShieldTimer = 6;
-		TotalManaSpent += SpellInfo.ShieldMana;
+		Data[1] -= SpellInfo.ShieldMana;
+		Data[3] = 6;
+		Data[6] += SpellInfo.ShieldMana;
 	}
 
 	public void CastPoison()
 	{
-		PlayerMana -= SpellInfo.PoisonMana;
-		PoisonTimer = 6;
-		TotalManaSpent += SpellInfo.PoisonMana;
+		Data[1] -= SpellInfo.PoisonMana;
+		Data[4] = 6;
+		Data[6] += SpellInfo.PoisonMana;
 	}
 
 	public void CastRecharge()
 	{
-		PlayerMana -= SpellInfo.RechargeMana;
-		RechargeTimer = 5;
-		TotalManaSpent += SpellInfo.RechargeMana;
+		Data[1] -= SpellInfo.RechargeMana;
+		Data[5] = 5;
+		Data[6] += SpellInfo.RechargeMana;
 	}
 
 	private void BeforeRound()
 	{
-		if (RechargeTimer > 0)
+		if (Data[5] > 0)
 		{
-			PlayerMana += 101;
-			RechargeTimer--;
+			Data[1] += 101;
+			Data[5]--;
 		}
-		if (PoisonTimer > 0)
+		if (Data[4] > 0)
 		{
-			BossHealth -= 3;
-			PoisonTimer--;
+			Data[2] -= 3;
+			Data[4]--;
 		}
 	}
 
 	private void PostRound()
 	{
-		if (ShieldTimer > 0)
-			ShieldTimer--;
-		CheckIsEnd();
+		if (Data[3] > 0)
+			Data[3]--;
 	}
 
-	private void CheckIsEnd()
-	{
-		if (BossHealth <= 0)
-		{
-			PlayerWins = true;
-			IsCompleted = true;
-		}
-		else if (PlayerHealth <= 0)
-		{
-			PlayerWins = false;
-			IsCompleted = true;
-		}
-		else if (IsPlayerTurn == false && RechargeTimer == 0 && false == CanCastAny())
-		{
-			PlayerWins = false;
-			IsCompleted = true;
-		}
-	}
-
-	public void BossAttack()
+	public void BossAttack(int bossDamage)
 	{
 		BeforeRound();
-		var damage = BossDamage - (ShieldTimer > 0 ? 7 : 0);
-		PlayerHealth -= damage > 0 ? damage : 1;
+		var damage = bossDamage - (Data[3] > 0 ? 7 : 0);
+		Data[0] -= damage > 0 ? damage : 1;
 		PostRound();
 		IsPlayerTurn = true;
 	}
@@ -132,21 +117,15 @@ internal class BattleData
 		IsPlayerTurn = false;
 	}
 
-	public BattleData Clone()
+	public BattleData Clone(ArrayPool<int> pool)
 	{
-		return new BattleData
-		{
-			PlayerWins = PlayerWins,
-			IsCompleted = IsCompleted,
-			IsPlayerTurn = IsPlayerTurn,
-			TotalManaSpent = TotalManaSpent,
-			PlayerHealth = PlayerHealth,
-			PlayerMana = PlayerMana,
-			BossHealth = BossHealth,
-			BossDamage = BossDamage,
-			ShieldTimer = ShieldTimer,
-			PoisonTimer = PoisonTimer,
-			RechargeTimer = RechargeTimer
-		};
+		var clone = new BattleData(pool, Data[0], Data[1], Data[2]);
+		clone.Data[3] = Data[3];
+		clone.Data[4] = Data[4];
+		clone.Data[5] = Data[5];
+		clone.Data[6] = Data[6];
+		clone.IsPlayerTurn = IsPlayerTurn;
+
+		return clone;
 	}
 }

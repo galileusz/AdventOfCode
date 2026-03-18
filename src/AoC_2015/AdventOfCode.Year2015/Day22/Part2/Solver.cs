@@ -1,91 +1,101 @@
 ﻿using AdventOfCode.Commons;
 using AdventOfCode.Year2015.Day22.Commons;
 using AdventOfCodeGate.Interfaces;
+using System.Buffers;
 
 namespace AdventOfCode.Year2015.Day22.Part2;
 
 internal class Solver : BaseResolver, IAdventOfCode
 {
 	private int _minManaSpent;
+	private ArrayPool<int> _pool;
 	public override string Solve(string input)
 	{
+		_pool = ArrayPool<int>.Shared;
 		_minManaSpent = int.MaxValue;
-		var battleData = new BattleData
-		{
-			PlayerHealth = 50,
-			PlayerMana = 500,
-		};
 
 		var span = input.AsSpan().Trim();
 		var enterIndex = span.IndexOf('\n');
-		battleData.BossHealth = int.Parse(span[12..enterIndex]);
-		battleData.BossDamage = int.Parse(span[(enterIndex + 9)..]);
+		var bossHealth = int.Parse(span[12..enterIndex]);
+		var bossDamage = int.Parse(span[(enterIndex + 9)..]);
 
-		SimulateBattle(battleData);
+		var battleData = new BattleData(_pool, 50, 500, bossHealth);
+
+		SimulateBattle(battleData, bossDamage);
 
 		return _minManaSpent.ToString();
 	}
 
-	public void SimulateBattle(BattleData battleData)
+	public void SimulateBattle(BattleData battleData, int bossDamage)
 	{
-		if (battleData.TotalManaSpent >= _minManaSpent)
-			return;
-		if (battleData.PlayerWins && battleData.TotalManaSpent < _minManaSpent)
+		if (battleData.GetTotalManaSpent() >= _minManaSpent)
 		{
-			_minManaSpent = battleData.TotalManaSpent;
-		}
-		if (battleData.IsCompleted)	
+			_pool.Return(battleData.Data);
 			return;
+		}
+		if (battleData.IsPlayerWin() && battleData.GetTotalManaSpent() < _minManaSpent)
+		{
+			_minManaSpent = battleData.GetTotalManaSpent();
+		}
+		if (battleData.IsComplete())
+		{
+			_pool.Return(battleData.Data);
+			return;
+		}
 
 		if (battleData.IsPlayerTurn)
 		{
-			SimulatePlayerTurn(battleData);
+			SimulatePlayerTurn(battleData, bossDamage);
 		}
 		else
-			SimulateBossTurn(battleData);
+			SimulateBossTurn(battleData, bossDamage);
 	}
 
-	private void SimulateBossTurn(BattleData battleData)
+	private void SimulateBossTurn(BattleData battleData, int bossDamage)
 	{
-		battleData.BossAttack();
-		SimulateBattle(battleData);
+		battleData.BossAttack(bossDamage);
+		SimulateBattle(battleData, bossDamage);
 	}
 
-	private void SimulatePlayerTurn(BattleData battleData)
+	private void SimulatePlayerTurn(BattleData battleData, int bossDamage)
 	{
-		battleData.PlayerHealth--;
-		if (battleData.PlayerHealth <= 0)
+		battleData.Data[0]--;
+		if (battleData.Data[0] <= 0)
+		{
+			_pool.Return(battleData.Data);
 			return;
+		}
 
 		if (battleData.CanCastDrain())
 		{
-			var clone = battleData.Clone();
+			var clone = battleData.Clone(_pool);
 			clone.PlayerAttack(ESpell.Drain);
-			SimulateBattle(clone);
+			SimulateBattle(clone, bossDamage);
 		}
 		if (battleData.CanCastMissile())
 		{
-			var clone = battleData.Clone();
+			var clone = battleData.Clone(_pool);
 			clone.PlayerAttack(ESpell.Missile);
-			SimulateBattle(clone);
+			SimulateBattle(clone, bossDamage);
 		}
 		if (battleData.CanCastShield())
 		{
-			var clone = battleData.Clone();
+			var clone = battleData.Clone(_pool);
 			clone.PlayerAttack(ESpell.Shield);
-			SimulateBattle(clone);
+			SimulateBattle(clone, bossDamage);
 		}
 		if (battleData.CanCastPoison())
 		{
-			var clone = battleData.Clone();
+			var clone = battleData.Clone(_pool);
 			clone.PlayerAttack(ESpell.Poison);
-			SimulateBattle(clone);
+			SimulateBattle(clone, bossDamage);
 		}
 		if (battleData.CanCastRecharge())
 		{
-			var clone = battleData.Clone();
+			var clone = battleData.Clone(_pool);
 			clone.PlayerAttack(ESpell.Recharge);
-			SimulateBattle(clone);
+			SimulateBattle(clone, bossDamage);
 		}
+		_pool.Return(battleData.Data);
 	}
 }
